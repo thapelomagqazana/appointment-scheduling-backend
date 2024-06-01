@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const connectDB = require("../config/db");
+const connectDB = require("../../config/db");
 const { MongoMemoryServer } = require("mongodb-memory-server");
 
 describe("Database Connection", () => {
