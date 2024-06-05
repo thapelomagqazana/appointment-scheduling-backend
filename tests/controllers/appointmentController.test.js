@@ -3,12 +3,7 @@ const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const Appointment = require('../../models/Appointment');
 const User = require('../../models/User');
-const bcrypt = require('bcrypt');
 const app = require("../../app");
-const appointmentRoutes = require('../../routes/appointmentRoutes');
-
-// const authRoutes = require("../../routes/authRoutes");
-// const auth = require('../../middleware/auth');
 
 describe('Appointment Controller', () => {
   let mongoServer;
@@ -23,12 +18,6 @@ describe('Appointment Controller', () => {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-
-    // app = express();
-    // app.use(express.json());
-    // // app.use('/api/auth', authRoutes);
-    // app.use('/api/appointments', appointmentRoutes);
-    
 
     // Create a test user (patient)
     await request(app)
