@@ -44,11 +44,7 @@ const register = async (req, res) => {
         await user.save();
 
         // Create JWT payload
-        const payload = {
-            user: {
-                id: user.id
-            }
-        };
+        const payload = { _id: user._id };
 
         // Sign JWT token
         jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" }, (err, token) => {
@@ -86,11 +82,7 @@ const login = async (req, res) => {
         }
 
         // Create JWT payload
-        const payload = {
-            user: {
-                id: user.id
-            }
-        };
+        const payload = { _id: user._id };
 
         // Sign JWT token
         jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" }, (err, token) => {

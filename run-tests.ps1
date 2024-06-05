@@ -1,6 +1,7 @@
 # Define an array of test files
 $testFiles = @(
     "tests/controllers/authController.test.js",
+    "tests/controllers/appointmentController.test.js",
     "tests/dbs",
     "tests/models"
     # "tests/controllers/authController.test.js",

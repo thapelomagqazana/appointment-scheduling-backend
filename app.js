@@ -1,8 +1,8 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
+const appointmentRoutes = require("./routes/appointmentRoutes");
 
 const errorHandler = require("./middleware/errorHandler");
 const logger = require("morgan");
@@ -10,9 +10,6 @@ const logger = require("morgan");
 // require("dotenv").config();
 
 const app = express();
-
-// Connect to Database
-connectDB();
 
 // Logging
 // app.use(logger("dev"));
@@ -23,6 +20,7 @@ app.use(cors());
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/appointments", appointmentRoutes);
 
 // Error Handling Middleware
 app.use(errorHandler);

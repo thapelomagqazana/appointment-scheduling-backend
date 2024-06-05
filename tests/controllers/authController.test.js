@@ -44,7 +44,7 @@ describe('Auth Routes', () => {
       expect(res.body).toHaveProperty('token');
 
       const decoded = jwt.verify(res.body.token, process.env.JWT_SECRET);
-      const user = await User.findById(decoded.user.id);
+      const user = await User.findById(decoded._id);
 
       expect(user).toBeTruthy();
       expect(user.email).toBe('test@example.com');

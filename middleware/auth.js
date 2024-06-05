@@ -19,13 +19,13 @@ const User = require("../models/User");
 const auth = async (req, res, next) => {
     try {
         // Retrieve token from Authorization header and remove 'Bearer ' prefix
-        const token = req.header("Authorization").replace("Bearer", "");
+        const token = req.header("Authorization").replace("Bearer ", "");
 
         // Decode and verify the JWT token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
         // Find the user by ID and ensure the token is still valid
-        const user = await User.findOne({ _id: decoded.id, "tokens.token": token });
+        const user = await User.findOne({ _id: decoded._id });
         if (!user) {
             throw new Error();
         }
