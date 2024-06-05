@@ -4,6 +4,7 @@ const cors = require("cors");
 const authRoutes = require("./routes/authRoutes");
 const appointmentRoutes = require("./routes/appointmentRoutes");
 const doctorRoutes = require('./routes/doctorRoutes');
+const userRoutes = require("./routes/userRoutes");
 const errorHandler = require("./middleware/errorHandler");
 const logger = require("morgan");
 
@@ -20,6 +21,7 @@ app.use(cors());
 app.use("/api/auth", authRoutes);
 app.use("/api/appointments", appointmentRoutes);
 app.use('/api/doctors', doctorRoutes);
+app.use("/api/user", userRoutes);
 
 // Error Handling Middleware
 app.use(errorHandler);

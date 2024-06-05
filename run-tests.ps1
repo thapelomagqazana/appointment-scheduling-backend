@@ -3,6 +3,7 @@ $testFiles = @(
     "tests/controllers/authController.test.js",
     "tests/controllers/appointmentController.test.js",
     "tests/controllers/doctorController.test.js",
+    "tests/controllers/userController.test.js",
     "tests/middleware/authorize.test.js",
     "tests/dbs",
     "tests/models"
