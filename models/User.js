@@ -34,7 +34,9 @@ const UserSchema = new mongoose.Schema({
         type: String,
         enum: ["receptionist", "doctor", "patient"],
         required: [true, "Role is required"],
-    }
+    },
+    resetPasswordToken: String,
+    resetPasswordExpires: Date,
 });
 
 /**
