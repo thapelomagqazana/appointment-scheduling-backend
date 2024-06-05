@@ -7,8 +7,6 @@ const doctorRoutes = require('./routes/doctorRoutes');
 const errorHandler = require("./middleware/errorHandler");
 const logger = require("morgan");
 
-require("dotenv").config();
-
 const app = express();
 
 // Logging

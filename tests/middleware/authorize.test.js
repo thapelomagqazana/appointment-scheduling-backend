@@ -1,11 +1,10 @@
 const request = require('supertest');
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
-const Appointment = require('../../models/Appointment');
 const User = require('../../models/User');
 const app = require("../../app");
 
-describe('Appointment Controller', () => {
+describe('RBAC Middleware', () => {
   let mongoServer;
   let patientToken, doctorToken, receptionistToken;
   let patientId, doctorId, receptionistId;
@@ -27,7 +26,6 @@ describe('Appointment Controller', () => {
     patientToken = await loginAndGetToken('patient@example.com', 'password123');
     doctorToken = await loginAndGetToken('doctor@example.com', 'password123');
     receptionistToken = await loginAndGetToken('receptionist@example.com', 'password123');
-    
   });
 
   afterAll(async () => {
@@ -35,8 +33,8 @@ describe('Appointment Controller', () => {
     await mongoServer.stop();
   });
 
-  describe('POST /create', () => {
-    it('should create a new appointment', async () => {
+  describe('POST /api/appointments/create', () => {
+    it('should allow access for patient role', async () => {
       const res = await request(app)
         .post('/api/appointments/create')
         .set('Authorization', `Bearer ${patientToken}`)
@@ -46,62 +44,37 @@ describe('Appointment Controller', () => {
           date: new Date(),
           reason: 'Routine check-up',
         });
-      // console.log(res);
       expect(res.status).toBe(200);
-      expect(res.body).toHaveProperty('_id');
-      expect(res.body).toHaveProperty('patient', patientId.toString());
-      expect(res.body).toHaveProperty('doctor', doctorId.toString());
     });
-  });
 
-  describe('GET /', () => {
-    it('should get all appointments', async () => {
+    it('should deny access for doctor role', async () => {
       const res = await request(app)
-        .get('/api/appointments/')
-        .set('Authorization', `Bearer ${doctorToken}`);
+        .post('/api/appointments/create')
+        .set('Authorization', `Bearer ${doctorToken}`)
+        .send({
+          patient: patientId,
+          doctor: doctorId,
+          date: new Date(),
+          reason: 'Routine check-up',
+        });
 
-      expect(res.status).toBe(200);
-      expect(res.body).toBeInstanceOf(Array);
+      expect(res.status).toBe(403);
+      expect(res.body).toHaveProperty('message', 'Access denied');
     });
-  });
 
-  describe('PUT /update/:id', () => {
-    it('should update the appointment status', async () => {
-      const appointment = new Appointment({
-        patient: patientId,
-        doctor: doctorId,
-        date: new Date(),
-        reason: 'Routine check-up',
-      });
-      await appointment.save();
-
+    it('should deny access for receptionist role', async () => {
       const res = await request(app)
-        .put(`/api/appointments/update/${appointment.id}`)
+        .post('/api/appointments/create')
         .set('Authorization', `Bearer ${receptionistToken}`)
-        .send({ status: 'confirmed' });
+        .send({
+          patient: patientId,
+          doctor: doctorId,
+          date: new Date(),
+          reason: 'Routine check-up',
+        });
 
-      expect(res.status).toBe(200);
-      expect(res.body).toHaveProperty('_id', appointment.id);
-      expect(res.body).toHaveProperty('status', 'confirmed');
-    });
-  });
-
-  describe('DELETE /delete/:id', () => {
-    it('should delete the appointment', async () => {
-      const appointment = new Appointment({
-        patient: patientId,
-        doctor: doctorId,
-        date: new Date(),
-        reason: 'Routine check-up',
-      });
-      await appointment.save();
-
-      const res = await request(app)
-        .delete(`/api/appointments/delete/${appointment.id}`)
-        .set('Authorization', `Bearer ${receptionistToken}`);
-
-      expect(res.status).toBe(200);
-      expect(res.body).toHaveProperty('msg', 'Appointment removed');
+      expect(res.status).toBe(403);
+      expect(res.body).toHaveProperty('message', 'Access denied');
     });
   });
 

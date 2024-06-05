@@ -2,14 +2,12 @@ const request = require('supertest');
 const express = require('express');
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
-const authRoutes = require('../../routes/authRoutes');
 const User = require('../../models/User');
+const app = require("../../app");
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
 
 describe('Auth Routes', () => {
   let mongoServer;
-  let app;
 
   beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
@@ -18,10 +16,6 @@ describe('Auth Routes', () => {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-
-    app = express();
-    app.use(express.json());
-    app.use('/api/auth', authRoutes);
   });
 
   afterAll(async () => {
@@ -130,10 +124,7 @@ describe('Auth Routes', () => {
           email: 'invalidemail',
           password: ''
         });
-        // console.log(res);
       expect(res.status).toBe(400);
-    //   console.log(res.body);
-    //   expect(res.body.errors).toHaveLength(2);
     });
   });
 
