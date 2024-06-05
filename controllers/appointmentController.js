@@ -4,18 +4,35 @@ const Appointment = require("../models/Appointment");
  * Create a new appointment.
  *
  * This function creates a new appointment by taking the patient, doctor, date, and reason from the request body,
- * saving the appointment to the database, and returning the created appointment in the response.
+ * checking for existing appointments with the same doctor and overlapping times, saving the appointment to the database,
+ * and returning the created appointment in the response.
  *
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
 const createAppointment = async (req, res) => {
     const { patient, doctor, date, reason } = req.body;
+    const appointmentDate = new Date(date);
+
     try {
+        // Check for overlapping appointments
+        const existingAppointments = await Appointment.find({
+            doctor,
+            date: {
+                $gte: new Date(appointmentDate.setMinutes(appointmentDate.getMinutes() - 30)),
+                $lte: new Date(appointmentDate.setMinutes(appointmentDate.getMinutes() + 60))
+            }
+        });
+
+        if (existingAppointments.length > 0){
+            return res.status(400).json({ msg: "Doctor is already booked for this time slot" });
+        }
+
+        // Create new appointment
         const newAppointment = new Appointment({
             patient,
             doctor,
-            date,
+            date: appointmentDate,
             reason
         });
 

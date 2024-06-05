@@ -52,6 +52,31 @@ describe('Appointment Controller', () => {
       expect(res.body).toHaveProperty('patient', patientId.toString());
       expect(res.body).toHaveProperty('doctor', doctorId.toString());
     });
+
+    it('should return 400 if there is a conflicting appointment', async () => {
+      const appointmentDate = new Date();
+
+      // Create an existing appointment
+      await Appointment.create({
+        patient: patientId,
+        doctor: doctorId,
+        date: appointmentDate,
+        reason: 'Routine Checkup'
+      });
+
+      const res = await request(app)
+        .post('/api/appointments/create')
+        .set('Authorization', `Bearer ${patientToken}`)
+        .send({
+          patient: patientId,
+          doctor: doctorId,
+          date: appointmentDate,
+          reason: 'Follow-up Visit'
+        });
+
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty('msg', 'Doctor is already booked for this time slot');
+    });
   });
 
   describe('GET /', () => {
