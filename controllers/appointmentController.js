@@ -1,4 +1,6 @@
 const Appointment = require("../models/Appointment");
+const User = require("../models/User");
+const { sendEmail } = require("../services/notificationService");
 
 /**
  * Create a new appointment.
@@ -37,6 +39,20 @@ const createAppointment = async (req, res) => {
         });
 
         const appointment = await newAppointment.save();
+        
+        const patient1 = await User.findById(patient);
+        const doctor1 = await User.findById(doctor);
+
+
+        // Send confirmation email
+        const patientEmail = patient1.email;
+        const doctorEmail = doctor1.email;
+        const subject = 'Appointment Confirmation';
+        const text = `Your appointment is confirmed for ${new Date(appointment.date).toLocaleString()} for ${appointment.reason}.`;
+
+        sendEmail(patientEmail, subject, text);
+        sendEmail(doctorEmail, subject, text);
+
         res.json(appointment);
     } catch (err) {
         console.error(err.message);
@@ -47,15 +63,38 @@ const createAppointment = async (req, res) => {
 /**
  * Get all appointments.
  *
- * This function retrieves all appointments from the database, populates the patient and doctor fields,
- * and returns the list of appointments in the response.
+ * This function retrieves appointments from the database based on optional query parameters
+ * for date, doctor, and patient. It populates the patient and doctor fields and returns the list of appointments in the response.
  *
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
 const getAppointments = async (req, res) => {
+    const { date, doctor, patient } = req.query;
+
+    let filter = {};
+
+    if (date){
+        const startDate = new Date(date);
+        const endDate = new Date(date);
+        endDate.setDate(endDate.getDate() + 1);
+
+        filter.date = {
+            $gte: startDate,
+            $lte: endDate
+        };
+    }
+
+    if (doctor){
+        filter.doctor = doctor;
+    }
+
+    if (patient){
+        filter.patient = patient;
+    }
+
     try {
-        const appointments = await Appointment.find().populate("patient").populate("doctor");
+        const appointments = await Appointment.find(filter).populate("patient").populate("doctor");
         res.json(appointments);
     } catch (err) {
         console.error(err.message);
@@ -80,6 +119,19 @@ const updateAppointment = async (req, res) => {
             { status },
             { new: true }
         );
+
+        const patient1 = await User.findById(appointment.patient);
+        const doctor1 = await User.findById(appointment.doctor);
+
+        // Send update email
+        const patientEmail = patient1.email;
+        const doctorEmail = doctor1.email;
+        const subject = 'Appointment Update';
+        const text = `Your appointment status has been updated to ${status}.`;
+
+        sendEmail(patientEmail, subject, text);
+        sendEmail(doctorEmail, subject, text);
+
         res.json(appointment);
     } catch (error) {
         console.error(err.message);
@@ -97,7 +149,20 @@ const updateAppointment = async (req, res) => {
  */
 const deleteAppointment = async (req, res) => {
     try {
-        await Appointment.findByIdAndDelete(req.params.id);
+        const appointment = await Appointment.findByIdAndDelete(req.params.id);
+
+        const patient1 = await User.findById(appointment.patient);
+        const doctor1 = await User.findById(appointment.doctor);
+
+        // Send cancellation email
+        const patientEmail = patient1.email;
+        const doctorEmail = doctor1.email;
+        const subject = 'Appointment Cancellation';
+        const text = `Your appointment scheduled for ${new Date(appointment.date).toLocaleString()} has been cancelled.`;
+
+        sendEmail(patientEmail, subject, text);
+        sendEmail(doctorEmail, subject, text);
+
         res.json({ msg: "Appointment removed" });
     } catch (err) {
         console.error(err.message);

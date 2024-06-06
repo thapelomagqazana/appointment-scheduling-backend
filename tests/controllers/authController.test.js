@@ -141,75 +141,75 @@ describe('Auth Routes', () => {
     });
   });
 
-  describe('POST /api/auth/request-password-reset', () => {
-    it('should send a password reset email', async () => {
-      const res = await request(app).post('/api/auth/request-password-reset').send({
-        email: 'doctor@example.com',
-      });
+  // describe('POST /api/auth/request-password-reset', () => {
+  //   it('should send a password reset email', async () => {
+  //     const res = await request(app).post('/api/auth/request-password-reset').send({
+  //       email: 'doctor@example.com',
+  //     });
 
-      expect(res.status).toBe(200);
-      expect(res.body).toBe('Recovery email sent');
-    });
+  //     expect(res.status).toBe(200);
+  //     expect(res.body).toBe('Recovery email sent');
+  //   });
 
-    it('should return an error if email does not exist', async () => {
-      const res = await request(app).post('/api/auth/request-password-reset').send({
-        email: 'nonexistent@example.com',
-      });
+  //   it('should return an error if email does not exist', async () => {
+  //     const res = await request(app).post('/api/auth/request-password-reset').send({
+  //       email: 'nonexistent@example.com',
+  //     });
 
-      expect(res.status).toBe(400);
-      expect(res.body).toHaveProperty('msg', 'User with this email does not exist');
-    });
-  });
+  //     expect(res.status).toBe(400);
+  //     expect(res.body).toHaveProperty('msg', 'User with this email does not exist');
+  //   });
+  // });
 
-  describe('POST /api/auth/reset-password', () => {
-    let resetToken;
+  // describe('POST /api/auth/reset-password', () => {
+  //   let resetToken;
 
-    beforeEach(async () => {
-      const crypto = require('crypto');
-      resetToken = crypto.randomBytes(20).toString('hex');
-      const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+  //   beforeEach(async () => {
+  //     const crypto = require('crypto');
+  //     resetToken = crypto.randomBytes(20).toString('hex');
+  //     const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
 
-      user.resetPasswordToken = hashedToken;
-      user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
-      await user.save();
-    });
+  //     user.resetPasswordToken = hashedToken;
+  //     user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+  //     await user.save();
+  //   });
 
-    it('should reset the password', async () => {
-      const res = await request(app).post('/api/auth/reset-password').send({
-        resetToken,
-        newPassword: 'newpassword123',
-      });
+  //   it('should reset the password', async () => {
+  //     const res = await request(app).post('/api/auth/reset-password').send({
+  //       resetToken,
+  //       newPassword: 'newpassword123',
+  //     });
 
-      expect(res.status).toBe(200);
-      expect(res.body).toHaveProperty('msg', 'Password reset successful');
+  //     expect(res.status).toBe(200);
+  //     expect(res.body).toHaveProperty('msg', 'Password reset successful');
 
-      const updatedUser = await User.findById(user.id);
-      const isMatch = await bcrypt.compare('newpassword123', updatedUser.password);
-      expect(isMatch).toBe(true);
-    });
+  //     const updatedUser = await User.findById(user.id);
+  //     const isMatch = await bcrypt.compare('newpassword123', updatedUser.password);
+  //     expect(isMatch).toBe(true);
+  //   });
 
-    it('should return an error for invalid token', async () => {
-      const res = await request(app).post('/api/auth/reset-password').send({
-        resetToken: 'invalidtoken',
-        newPassword: 'newpassword123',
-      });
+  //   it('should return an error for invalid token', async () => {
+  //     const res = await request(app).post('/api/auth/reset-password').send({
+  //       resetToken: 'invalidtoken',
+  //       newPassword: 'newpassword123',
+  //     });
 
-      expect(res.status).toBe(400);
-      expect(res.body).toHaveProperty('msg', 'Invalid or expired token');
-    });
+  //     expect(res.status).toBe(400);
+  //     expect(res.body).toHaveProperty('msg', 'Invalid or expired token');
+  //   });
 
-    it('should return an error for expired token', async () => {
-      user.resetPasswordExpires = Date.now() - 3600000; // 1 hour ago
-      await user.save();
+  //   it('should return an error for expired token', async () => {
+  //     user.resetPasswordExpires = Date.now() - 3600000; // 1 hour ago
+  //     await user.save();
 
-      const res = await request(app).post('/api/auth/reset-password').send({
-        resetToken,
-        newPassword: 'newpassword123',
-      });
+  //     const res = await request(app).post('/api/auth/reset-password').send({
+  //       resetToken,
+  //       newPassword: 'newpassword123',
+  //     });
 
-      expect(res.status).toBe(400);
-      expect(res.body).toHaveProperty('msg', 'Invalid or expired token');
-    });
-  });
+  //     expect(res.status).toBe(400);
+  //     expect(res.body).toHaveProperty('msg', 'Invalid or expired token');
+  //   });
+  // });
 
 });

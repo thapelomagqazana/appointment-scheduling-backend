@@ -8,6 +8,8 @@ const userRoutes = require("./routes/userRoutes");
 const errorHandler = require("./middleware/errorHandler");
 const logger = require("morgan");
 
+const { scheduleNotifications } = require("./services/notificationService");
+
 const app = express();
 
 // Logging
@@ -25,5 +27,8 @@ app.use("/api/user", userRoutes);
 
 // Error Handling Middleware
 app.use(errorHandler);
+
+// Schedule notifications
+scheduleNotifications();
 
 module.exports = app;
